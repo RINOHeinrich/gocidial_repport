@@ -1,0 +1,21 @@
+package models
+
+// AgentData représente les données d'un agent.
+type AgentData struct {
+	LiveAgentID  string `json:"live_agent_id"`
+	User         string `json:"user"`
+	ServerIP     string `json:"server_ip"`
+	Status       string `json:"status"`
+	CampaignID   string `json:"campaign_id"`
+	CallsToday   string `json:"calls_today"`
+	LastCallTime string `json:"last_call_time"`
+}
+
+type FetchError struct {
+	Message string `json:"message"`
+}
+
+// Data contient la liste des agents.
+type Data struct {
+	Agents []AgentData
+}
