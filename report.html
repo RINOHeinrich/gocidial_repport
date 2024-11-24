@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report</title>
+    <script src="https://unpkg.com/htmx.org@1.9.1"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+<div class="container mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-2xl font-semibold mb-4">Agent Report</h1>
+
+    <!-- Table that will be updated every 10 seconds with HTMX -->
+    <div >
+        <!-- HTMX will replace the content of this div with the response from the server -->
+        <table class="min-w-full table-auto border-collapse border border-gray-200" hx-get="/report-table" hx-trigger="every 10s" hx-target="#agent-table" hx-swapp="innerHTML">
+            <thead>
+                <tr>
+                    <th class="px-4 py-2 border border-gray-300">User</th>
+                    <th class="px-4 py-2 border border-gray-300">Server IP</th>
+                    <th class="px-4 py-2 border border-gray-300">Status</th>
+                    <th class="px-4 py-2 border border-gray-300">MM:SS</th>
+                    <th class="px-4 py-2 border border-gray-300">Campaign ID</th>
+                    <th class="px-4 py-2 border border-gray-300">Calls Today</th>
+                </tr>
+            </thead>
+            <tbody id="agent-table">
+                
+                <!-- Data will be populated here dynamically -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
