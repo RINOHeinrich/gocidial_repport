@@ -20,6 +20,9 @@ type AgentData struct {
 	CallsToday   string `json:"calls_today"`
 	LastCallTime string `json:"last_call_time"`
 }
+type fetchError struct {
+	Message string `json:"message"`
+}
 
 // Data contient la liste des agents.
 type Data struct {
@@ -41,8 +44,17 @@ func calculateDuration(lastCallTime string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	currentTime := time.Now()
-	duration := currentTime.Sub(callTime)
+	// Convertir callTime en UTC
+	callTimeUTC := callTime.UTC()
+
+	// Utiliser l'heure actuelle en UTC
+	currentTimeUTC := time.Now().UTC()
+
+	log.Println("Current time in UTC:", currentTimeUTC)
+	log.Println("Call time in UTC:", callTimeUTC)
+
+	// Calculer la différence
+	duration := currentTimeUTC.Sub(callTimeUTC)
 	minutes := int(duration.Minutes())
 	seconds := int(duration.Seconds()) % 60
 	return fmt.Sprintf("%02d:%02d", minutes, seconds), nil
@@ -87,13 +99,30 @@ func reportTableHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Décoder les données JSON
-		err = json.Unmarshal(body, &agents)
-		if err != nil {
+		// Vérifier si la réponse contient un message d'erreur ("No records found")
+		var anyFetchError fetchError
+		err = json.Unmarshal(body, &anyFetchError)
+		//log.Println(anyFetchError)
+		if err == nil {
 			log.Println(err)
+			//log.Println("Aucune donnée trouvée pour l'URL:", url)
+			continue
+		}
+
+		/* 	// Si le message est "No records found", ne pas essayer de désérialiser les agents
+		if message, exists := response["message"]; exists && message == "No records found" {
+			log.Println("Aucune donnée trouvée pour l'URL:", url)
+			continue
+		} */
+
+		// Décoder les données JSON dans le tableau d'agents
+		if err := json.Unmarshal(body, &agents); err != nil {
+			log.Println("Erreur lors du décodage des agents:", err)
 			http.Error(w, "Erreur lors du décodage des données JSON", http.StatusInternalServerError)
 			return
 		}
+
+		// Ajouter les agents récupérés à la liste globale
 		allAgents = append(allAgents, agents...)
 	}
 
@@ -117,7 +146,6 @@ func reportTableHandler(w http.ResponseWriter, r *http.Request) {
 		<td class="px-4 py-2 border border-gray-300">{{.LastCallTime}}</td>
         <td class="px-4 py-2 border border-gray-300">{{.CampaignID}}</td>
         <td class="px-4 py-2 border border-gray-300">{{.CallsToday}}</td>
-        
     </tr>
     {{end}}
     `
