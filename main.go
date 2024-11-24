@@ -59,98 +59,89 @@ func calculateDuration(lastCallTime string) (string, error) {
 
 // Gestionnaire pour la route /report.
 func reportHandler(w http.ResponseWriter, r *http.Request) {
-	// Effectuer la requête GET vers get_repport.php
-	resp, err := http.Get("https://crm.vicitelecom.fr/vicidial/get_repport.php")
-	if err != nil {
-		http.Error(w, "Erreur lors de la récupération des données", http.StatusInternalServerError)
-		return
-	}
-	defer resp.Body.Close()
-
-	// Lire la réponse
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		http.Error(w, "Erreur lors de la lecture de la réponse", http.StatusInternalServerError)
-		return
-	}
-
-	// Décoder les données JSON
+	var allAgents []AgentData
 	var agents []AgentData
-	err = json.Unmarshal(body, &agents)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "Erreur lors du décodage des données JSON", http.StatusInternalServerError)
-		return
+
+	// Effectuer la requête GET vers get_repport.php
+	dataSource := []string{
+		"https://crm.vicitelecom.fr/vicidial/get_repport.php",
+		"https://axe-formation3.vicitelecom.fr/vicidial/get_repport.php",
+	}
+
+	for _, url := range dataSource {
+		log.Println(url)
+		resp, err := http.Get(url)
+		if err != nil {
+			http.Error(w, "Erreur lors de la récupération des données", http.StatusInternalServerError)
+			return
+		}
+		defer resp.Body.Close()
+
+		// Lire la réponse
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			http.Error(w, "Erreur lors de la lecture de la réponse", http.StatusInternalServerError)
+			return
+		}
+
+		// Décoder les données JSON
+		err = json.Unmarshal(body, &agents)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Erreur lors du décodage des données JSON", http.StatusInternalServerError)
+			return
+		}
+		allAgents = append(allAgents, agents...)
+		log.Println(allAgents)
 	}
 
 	// Calculer la durée pour chaque agent entre current_datetime et last_call_time.
-	for i := range agents {
-		duration, err := calculateDuration(agents[i].LastCallTime)
+	for i := range allAgents {
+		duration, err := calculateDuration(allAgents[i].LastCallTime)
 		if err == nil {
-			agents[i].LastCallTime = duration // Remplacer last_call_time par la durée calculée
+			allAgents[i].LastCallTime = duration // Remplacer last_call_time par la durée calculée
 		} else {
-			agents[i].LastCallTime = "Erreur de calcul"
+			allAgents[i].LastCallTime = "Erreur de calcul"
 		}
 	}
 
 	// Générer la table HTML.
 	tmpl := `
-	<!DOCTYPE html>
-	<html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Report</title>
-		<style>
-			table {
-				width: 100%;
-				border-collapse: collapse;
-			}
-			th, td {
-				border: 1px solid #ccc;
-				padding: 8px;
-				text-align: left;
-			}
-			th {
-				background-color: #f4f4f4;
-			}
-		</style>
-	</head>
-	<body>
-		<h1>Agent Report</h1>
-		<table>
-			<thead>
-				<tr>
-					<th>Live Agent ID</th>
-					<th>User</th>
-					<th>Server IP</th>
-					<th>Status</th>
-					<th>Campaign ID</th>
-					<th>Calls Today</th>
-					<th>Duration (MM:SS)</th>
-				</tr>
-			</thead>
-			<tbody>
-				{{range .Agents}}
-				<tr>
-					<td>{{.LiveAgentID}}</td>
-					<td>{{.User}}</td>
-					<td>{{.ServerIP}}</td>
-					<td>{{.Status}}</td>
-					<td>{{.CampaignID}}</td>
-					<td>{{.CallsToday}}</td>
-					<td>{{.LastCallTime}}</td>
-				</tr>
-				{{end}}
-			</tbody>
-		</table>
-	</body>
-	</html>
-	`
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Report</title>
+</head>
+<body>
+<table>
+	<tr>
+		<th>Live Agent ID</th>
+		<th>User</th>
+		<th>Server IP</th>
+		<th>Status</th>
+		<th>Campaign ID</th>
+		<th>Calls Today</th>
+		<th>Last Call Time</th>
+	</tr>
+	{{range .Agents}}
+	<tr>
+		<td>{{.LiveAgentID}}</td>
+		<td>{{.User}}</td>
+		<td>{{.ServerIP}}</td>
+		<td>{{.Status}}</td>
+		<td>{{.CampaignID}}</td>
+		<td>{{.CallsToday}}</td>
+		<td>{{.LastCallTime}}</td>
+		</tr>
+			{{end}}
+</body>
+</html>
+`
 	// Compiler et exécuter le template.
 	t := template.Must(template.New("report").Parse(tmpl))
-	if err := t.Execute(w, Data{Agents: agents}); err != nil {
+	if err := t.Execute(w, Data{Agents: allAgents}); err != nil {
 		http.Error(w, "Erreur lors du rendu du template", http.StatusInternalServerError)
 	}
 }
