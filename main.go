@@ -10,16 +10,15 @@ import (
 	"time"
 )
 
-// AgentData représente les données d'un agent, avec last_update_time ajouté.
+// AgentData représente les données d'un agent, avec last_call_time ajouté.
 type AgentData struct {
-	LiveAgentID    string `json:"live_agent_id"`
-	User           string `json:"user"`
-	ServerIP       string `json:"server_ip"`
-	Status         string `json:"status"`
-	CampaignID     string `json:"campaign_id"`
-	CallsToday     string `json:"calls_today"`
-	LastCallTime   string `json:"last_call_time"`
-	LastUpdateTime string `json:"last_update_time"` // Nouveau champ
+	LiveAgentID  string `json:"live_agent_id"`
+	User         string `json:"user"`
+	ServerIP     string `json:"server_ip"`
+	Status       string `json:"status"`
+	CampaignID   string `json:"campaign_id"`
+	CallsToday   string `json:"calls_today"`
+	LastCallTime string `json:"last_call_time"` // Champ modifié
 }
 
 // Data contient la liste des agents.
@@ -34,24 +33,21 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-// Fonction pour calculer la différence entre deux horodatages au format "2006-01-02 15:04:05".
-func calculateDuration(lastCallTime, lastUpdateTime string) (string, error) {
-	// Définir le format d'horodatage attendu.
+// Fonction pour calculer la différence entre current_datetime et last_call_time au format "2006-01-02 15:04:05".
+func calculateDuration(lastCallTime string) (string, error) {
 	const layout = "2006-01-02 15:04:05"
 
-	// Convertir lastCallTime et lastUpdateTime en objets time.Time
-	callTime, err := time.Parse(layout, lastCallTime)
+	// Convertir lastCallTime en objet time.Time dans le fuseau horaire local
+	callTime, err := time.ParseInLocation(layout, lastCallTime, time.Local) // Utilisation du fuseau horaire local
 	if err != nil {
 		return "", err
 	}
 
-	updateTime, err := time.Parse(layout, lastUpdateTime)
-	if err != nil {
-		return "", err
-	}
+	// Obtenir l'heure actuelle dans le fuseau horaire local
+	currentTime := time.Now() // time.Now() prend automatiquement le fuseau horaire local
 
-	// Calculer la différence de temps entre last_update_time et last_call_time
-	duration := updateTime.Sub(callTime)
+	// Calculer la différence de temps entre currentTime et callTime
+	duration := currentTime.Sub(callTime)
 
 	// Calculer la durée en minutes et secondes
 	minutes := int(duration.Minutes())
@@ -82,13 +78,14 @@ func reportHandler(w http.ResponseWriter, r *http.Request) {
 	var agents []AgentData
 	err = json.Unmarshal(body, &agents)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Erreur lors du décodage des données JSON", http.StatusInternalServerError)
 		return
 	}
 
-	// Calculer la durée pour chaque agent entre last_call_time et last_update_time.
+	// Calculer la durée pour chaque agent entre current_datetime et last_call_time.
 	for i := range agents {
-		duration, err := calculateDuration(agents[i].LastCallTime, agents[i].LastUpdateTime)
+		duration, err := calculateDuration(agents[i].LastCallTime)
 		if err == nil {
 			agents[i].LastCallTime = duration // Remplacer last_call_time par la durée calculée
 		} else {
