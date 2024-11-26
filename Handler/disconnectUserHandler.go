@@ -97,9 +97,7 @@ func DisableUserHandler(w http.ResponseWriter, r *http.Request, servers map[stri
 	}
 
 	// Réponse JSON pour indiquer le succès
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Utilisateur déconnecté avec succès",
-	})
+	//w.WriteHeader(http.StatusOK)
+	ReportTableHandler(w, r, servers)
 
 }

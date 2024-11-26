@@ -118,7 +118,8 @@ func ReportTableHandler(w http.ResponseWriter, r *http.Request, servers map[stri
    		 hx-post="/disable-users"
 		 hx-ext="json-enc" 
     	 hx-vals='{"user": "{{.User}}", "domain": "{{.SourceDomain}}"}'
-    	 hx-swap="none"
+    	 hx-target="#agent-table"
+		 hx-swapp="innerHTML"
 		 hx-confirm="Êtes vous sure de vouloir déconnecter l'agent {{.User}}?"
 		 >
     	 Déconnecter
