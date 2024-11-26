@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"text/template"
@@ -14,18 +15,22 @@ import (
 	models "github.com/RINOHeinrich/gocidial/Models"
 )
 
+func extractDomain(urlStr string) string {
+	parsedURL, err := url.Parse(urlStr)
+	if err != nil {
+		return ""
+	}
+	return parsedURL.Host
+}
+
 // Gestionnaire pour la route /report-table, renvoie uniquement le corps de la table.
-func ReportTableHandler(w http.ResponseWriter, r *http.Request) {
+func ReportTableHandler(w http.ResponseWriter, r *http.Request, servers map[string]models.ServerConfig) {
 	var allAgents []models.AgentData
 	var agents []models.AgentData
 
-	dataSource := []string{
-		"https://crm.vicitelecom.fr/vicidial/get_repport.php",
-		"https://axe-formation1.vicitelecom.fr/vicidial/get_repport.php",
-		"https://axe-formation3.vicitelecom.fr/vicidial/get_repport.php",
-	}
-
-	for _, url := range dataSource {
+	for _, server := range servers {
+		url := server.URL + "vicidial/get_repport.php"
+		log.Println(url)
 		resp, err := http.Get(url)
 		if err != nil {
 			http.Error(w, "Erreur lors de la récupération des données", http.StatusInternalServerError)
@@ -49,13 +54,18 @@ func ReportTableHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Erreur lors du décodage des données JSON", http.StatusInternalServerError)
 			return
 		}
+		// Ajouter le domaine source pour chaque agent
+		domain := extractDomain(url)
+		for i := range agents {
+			agents[i].SourceDomain = domain
+		}
 
 		allAgents = append(allAgents, agents...)
 	}
 
 	for i := range allAgents {
-		log.Println(allAgents[i].LastStateChange)
-		log.Println(allAgents[i].LastCallTime)
+		//	log.Println(allAgents[i].LastStateChange)
+		//	log.Println(allAgents[i].LastCallTime)
 		duration, err := calculateDuration(allAgents[i].LastStateChange)
 		if err == nil {
 			allAgents[i].LastCallTime = duration
@@ -103,11 +113,17 @@ func ReportTableHandler(w http.ResponseWriter, r *http.Request) {
     <td class="px-4 py-2 border border-gray-300">{{.CampaignID}}</td>
     <td class="px-4 py-2 border border-gray-300">{{.CallsToday}}</td>
     <td class="px-4 py-2 border border-gray-300">
-        <button 
-            class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-            onclick="disconnectAgent('{{.User}}')">
-            Déconnecter
-        </button>
+		<button 
+   		 class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
+   		 hx-post="/disable-users"
+		 hx-ext="json-enc" 
+    	 hx-vals='{"user": "{{.User}}", "domain": "{{.SourceDomain}}"}'
+    	 hx-swap="none"
+		 hx-confirm="Êtes vous sure de vouloir déconnecter l'agent {{.User}}?"
+		 >
+    	 Déconnecter
+		</button>
+
     </td>
 </tr>
 {{end}}

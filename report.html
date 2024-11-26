@@ -6,22 +6,8 @@
     <title>Report</title>
     <script src="https://unpkg.com/htmx.org@1.9.1"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        function disconnectAgent(user) {
-            fetch('/disable-users', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user })
-            }).then(response => {
-                if (response.ok) {
-                    alert('Utilisateur désactivé avec succès');
-                    location.reload();
-                } else {
-                    alert('Erreur lors de la désactivation');
-                }
-            });
-        }
-    </script>
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
+
 </head>
 <body class="bg-gray-100 p-6">
 
