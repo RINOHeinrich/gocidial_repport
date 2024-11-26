@@ -35,8 +35,7 @@ func main() {
 
 	http.HandleFunc("/", handler.HomeHandler)                    // Route pour la page d'accueil
 	http.HandleFunc("/report-table", handler.ReportTableHandler) // Route pour récupérer la table HTML
-	http.HandleFunc("/disconnect", handler.DisconnectUserHandler)
-	log.Printf("Serveur démarré sur : http://%s", address)
+	http.HandleFunc("/disable-users", handler.DisableUserHandler)
 
 	// Activer HTTPS si nécessaire
 	if tlsEnable == "YES" {
