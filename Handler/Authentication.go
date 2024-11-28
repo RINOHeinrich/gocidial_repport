@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"io"
 	"log"
@@ -62,6 +63,12 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request, servers map[s
 		for _, server := range servers {
 			url := server.URL + ":8099/login"
 			log.Printf("Tentative d'authentification auprès de %s\n", url)
+			tr := &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			}
+
+			// Crée un client HTTP avec le transport personnalisé
+			client := &http.Client{Transport: tr}
 
 			req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(authJSON))
 			if err != nil {
@@ -72,7 +79,7 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request, servers map[s
 			req.Header.Set("Content-Type", "application/json")
 
 			// Envoyer la requête
-			resp, err := http.DefaultClient.Do(req)
+			resp, err := client.Do(req)
 			if err != nil {
 				log.Printf("Erreur lors de l'envoi de la requête: %v\n", err)
 				continue
@@ -88,10 +95,20 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request, servers map[s
 					continue
 				}
 
-				log.Printf("Authentification réussie auprès de %s\n", url)
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusOK)
-				w.Write(body) // Retourner le token
+				// Supposons que le token est dans le body sous forme brute
+				token := string(body)
+
+				// Ajouter le token au cookie
+				http.SetCookie(w, &http.Cookie{
+					Name:     "auth_token",
+					Value:    token,
+					Path:     "/",
+					HttpOnly: true, // Empêche l'accès via JavaScript
+					Secure:   true, // Nécessite HTTPS
+				})
+
+				// Rediriger vers la page des rapports
+				http.Redirect(w, r, "/", http.StatusSeeOther)
 				return
 			}
 
