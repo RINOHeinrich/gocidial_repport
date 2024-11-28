@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	models "github.com/RINOHeinrich/gocidial/Models"
 )
@@ -108,7 +109,9 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request, servers map[s
 				})
 
 				// Rediriger vers la page des rapports
-				http.Redirect(w, r, "/", http.StatusSeeOther)
+				//	http.Redirect(w, r, "/", http.StatusSeeOther)
+				w.Header().Set("HX-Redirect", "/report")
+				w.WriteHeader(http.StatusOK)
 				return
 			}
 
@@ -118,5 +121,32 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request, servers map[s
 		// Si aucun serveur n'a validé l'authentification
 		log.Println("Échec d'authentification auprès de tous les serveurs")
 		http.Error(w, "Erreur d'authentification", http.StatusUnauthorized)
+	}
+}
+
+func LogoutHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Vérifier si la méthode est POST
+		if r.Method != http.MethodPost {
+			http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+			return
+		}
+
+		// Supprimer tout cookie d'authentification si nécessaire
+		cookie := &http.Cookie{
+			Name:     "auth_token",
+			Value:    "",
+			Path:     "/",
+			Expires:  time.Unix(0, 0), // Expire immédiatement
+			HttpOnly: true,
+			Secure:   true, // Assurez-vous d'utiliser HTTPS
+		}
+		http.SetCookie(w, cookie)
+
+		// Ajouter le header HTMX pour la redirection
+		w.Header().Set("HX-Redirect", "/auth")
+
+		// Répondre avec un statut OK
+		w.WriteHeader(http.StatusOK)
 	}
 }

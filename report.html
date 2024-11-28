@@ -11,11 +11,19 @@
 <body class="bg-black text-white p-6">
 
 <div class="container mx-auto bg-white p-6 rounded shadow-lg">
-    <h1 class="text-3xl font-semibold text-green-600 mb-6">Agent Report</h1>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-semibold text-green-600">Agent Report</h1>
+        <!-- Logout Button -->
+        <button 
+            class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 focus:outline-none" 
+            hx-post="/logout" 
+            hx-swap="none">
+            Se déconnecter
+        </button>
+    </div>
 
     <!-- Table that will be updated every 10 seconds with HTMX -->
     <div>
-        <!-- HTMX will replace the content of this div with the response from the server -->
         <table class="min-w-full table-auto border-collapse border border-gray-300" hx-get="/report-table" hx-trigger="every 10s" hx-target="#agent-table" hx-swapp="innerHTML">
             <thead class="bg-green-600 text-white">
                 <tr>
@@ -23,7 +31,7 @@
                     <th class="px-4 py-2 border border-gray-300">IP du serveur</th>
                     <th class="px-4 py-2 border border-gray-300">Status</th>
                     <th class="px-4 py-2 border border-gray-300">MM:SS</th>
-                    <th class="px-4 py-2 border border-gray-300"> ID du campagne</th>
+                    <th class="px-4 py-2 border border-gray-300">ID du campagne</th>
                     <th class="px-4 py-2 border border-gray-300">Appelles du jour</th>
                     <th class="px-4 py-2 border border-gray-300">Action</th>
                 </tr>
