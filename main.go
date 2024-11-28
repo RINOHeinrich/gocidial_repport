@@ -22,12 +22,12 @@ func LoadServerConfigs() map[string]models.ServerConfig {
 			parts := strings.SplitN(env, "=", 2)
 			key := parts[0]
 			value := parts[1]
-			log.Println("clé: "+key, "value: "+value)
+			//	log.Println("clé: "+key, "value: "+value)
 			// Identifie l'index et le champ (URL, USERNAME, PASSWORD)
 			var serverIndex int
 			var field string
 			fmt.Sscanf(key, "SERVER%d_%s", &serverIndex, &field)
-			log.Println("field: " + field)
+			//log.Println("field: " + field)
 			// Ajoute ou met à jour la configuration du serveur
 			if serverIndex != 0 {
 				server := servers[strconv.Itoa(serverIndex)]
@@ -43,7 +43,7 @@ func LoadServerConfigs() map[string]models.ServerConfig {
 			}
 		}
 	}
-	log.Println(servers)
+	//log.Println(servers)
 	return servers
 }
 
@@ -83,6 +83,9 @@ func main() {
 	}) // Route pour récupérer la table HTML
 	http.HandleFunc("/disable-users", func(w http.ResponseWriter, r *http.Request) {
 		handler.DisableUserHandler(w, r, serverConfigs)
+	})
+	http.HandleFunc("/auth", func(w http.ResponseWriter, r *http.Request) {
+		handler.AuthenticationHandler(w, r, serverConfigs)
 	})
 
 	// Activer HTTPS si nécessaire

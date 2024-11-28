@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -29,8 +28,8 @@ func ReportTableHandler(w http.ResponseWriter, r *http.Request, servers map[stri
 	var agents []models.AgentData
 
 	for _, server := range servers {
-		url := server.URL + "vicidial/get_repport.php"
-		log.Println(url)
+		url := server.URL + "/vicidial/get_repport.php"
+		//log.Println(url)
 		resp, err := http.Get(url)
 		if err != nil {
 			http.Error(w, "Erreur lors de la récupération des données", http.StatusInternalServerError)

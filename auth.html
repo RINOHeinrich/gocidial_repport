@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion Superviseur - Vicitelecom</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org"></script>
+</head>
+<body class="bg-black text-white flex items-center justify-center min-h-screen" id="body">
+  <div class="w-full max-w-md bg-white shadow-md rounded-lg p-6">
+    <!-- Logo & Nom de l'application -->
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-bold text-green-600">Vicitelecom</h1>
+      <p class="text-sm text-gray-700 mt-2">Connexion à l'interface superviseur</p>
+    </div>
+    
+    <!-- Titre de la page -->
+    <h2 class="text-xl font-bold text-center text-black mb-4">Superviseur - Connexion</h2>
+    
+    <!-- Formulaire de connexion -->
+    <form 
+      hx-post="/auth" 
+      hx-target="#body" 
+      hx-swap="innerHTML"
+      class="space-y-4"
+    >
+      <!-- Champ Nom d'utilisateur -->
+      <div>
+        <label for="username" class="block text-sm font-medium text-gray-700">Nom d'utilisateur</label>
+        <input 
+          type="text" 
+          id="username" 
+          name="username" 
+          required 
+          class="w-full mt-1 px-4 py-2 border rounded-md focus:ring focus:ring-green-300 focus:outline-none focus:ring-opacity-50 text-black"
+        >
+      </div>
+      
+      <!-- Champ Mot de passe -->
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          required 
+          class="w-full mt-1 px-4 py-2 border rounded-md focus:ring focus:ring-green-300 focus:outline-none focus:ring-opacity-50 text-black"
+        >
+      </div>
+      
+      <!-- Bouton Connexion -->
+      <div>
+        <button 
+          type="submit" 
+          class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring focus:ring-green-300 focus:ring-opacity-50"
+        >
+          Connexion
+        </button>
+      </div>
+    </form>
+
+    <!-- Section pour la réponse -->
+    <div id="login-response" class="mt-4 text-center text-red-600"></div>
+  </div>
+</body>
+</html>

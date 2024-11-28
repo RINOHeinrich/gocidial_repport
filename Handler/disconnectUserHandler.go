@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -54,8 +53,8 @@ func DisableUserHandler(w http.ResponseWriter, r *http.Request, servers map[stri
 	}
 
 	// URL cible pour déconnecter l'utilisateur
-	requestURL := fmt.Sprintf("%svicidial/user_status.php", serverConfig.URL)
-	log.Println(requestURL)
+	requestURL := fmt.Sprintf("%s/vicidial/user_status.php", serverConfig.URL)
+	//log.Println(requestURL)
 
 	// Génération de l'en-tête Authorization
 	auth := serverConfig.Username + ":" + serverConfig.Password
