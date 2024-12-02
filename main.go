@@ -90,7 +90,16 @@ func main() {
 			handler.DisableUserHandler(w, r, serverConfigs)
 		})).ServeHTTP(w, r)
 	})
-
+	http.HandleFunc("/autodial-info", func(w http.ResponseWriter, r *http.Request) {
+		middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			handler.AutodialInfoHandler(w, r, serverConfigs)
+		})).ServeHTTP(w, r)
+	})
+	/* 	http.HandleFunc("/get-autodial-info", func(w http.ResponseWriter, r *http.Request) {
+		middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			handler.AutodialInfoHandler(w, r, serverConfigs)
+		})).ServeHTTP(w, r)
+	}) */
 	http.HandleFunc("/auth", func(w http.ResponseWriter, r *http.Request) {
 		handler.AuthenticationHandler(w, r, serverConfigs)
 	})

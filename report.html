@@ -21,7 +21,9 @@
             Se déconnecter
         </button>
     </div>
-
+     <div id="autodial-info" class="text-black" hx-get="/autodial-info"  hx-target="#autodial-info" hx-swapp="innerHTML" hx-trigger="every 2s" >
+        
+    </div> 
     <!-- Table that will be updated every 10 seconds with HTMX -->
     <div>
         <table class="min-w-full table-auto border-collapse border border-gray-300" hx-get="/report-table" hx-trigger="every 10s" hx-target="#agent-table" hx-swapp="innerHTML">

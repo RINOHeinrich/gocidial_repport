@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -13,6 +14,60 @@ import (
 
 	models "github.com/RINOHeinrich/gocidial/Models"
 )
+
+func AutodialInfoHandler(w http.ResponseWriter, r *http.Request, servers map[string]models.ServerConfig) {
+	// Préparer une structure pour le template
+	type ServerData struct {
+		URL       string
+		CallCount string
+	}
+
+	var serverList []ServerData
+
+	// Récupérer les informations depuis les serveurs
+	for _, server := range servers {
+		resp, err := http.Get(server.URL + "/vicidial/get_autodial_info.php")
+		if err != nil {
+			log.Println("Erreur lors de la requête vers", server.URL, ":", err)
+			serverList = append(serverList, ServerData{URL: server.URL, CallCount: "Erreur"})
+			continue
+		}
+		defer resp.Body.Close()
+
+		var data map[string]string
+		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+			log.Println("Erreur de décodage JSON pour", server.URL, ":", err)
+			serverList = append(serverList, ServerData{URL: server.URL, CallCount: "Erreur"})
+			continue
+		}
+
+		callCount, ok := data["count"]
+		if !ok {
+			log.Println("Le champ 'count' est manquant dans la réponse de", server.URL)
+			serverList = append(serverList, ServerData{URL: server.URL, CallCount: "Non disponible"})
+			continue
+		}
+
+		serverList = append(serverList, ServerData{URL: server.URL, CallCount: callCount})
+	}
+
+	// Template HTML
+	tmpl := `
+		<h1>Etat des Serveurs</h1>
+		<ul>
+			{{range .}}
+				<li> {{.CallCount}} appels envoyés sur {{.URL}}</li>
+			{{end}}
+		</ul>
+	`
+
+	// Rendre le template
+	t := template.Must(template.New("serverList").Parse(tmpl))
+	if err := t.Execute(w, serverList); err != nil {
+		log.Println("Erreur lors du rendu du template :", err)
+		http.Error(w, "Erreur interne du serveur", http.StatusInternalServerError)
+	}
+}
 
 func extractDomain(urlStr string) string {
 	parsedURL, err := url.Parse(urlStr)
@@ -26,7 +81,7 @@ func extractDomain(urlStr string) string {
 func ReportTableHandler(w http.ResponseWriter, r *http.Request, servers map[string]models.ServerConfig) {
 	var allAgents []models.AgentData
 	var agents []models.AgentData
-
+	//sql := "select count(*) from vicidial_auto_calls where status='SALE';"
 	for _, server := range servers {
 		url := server.URL + "/vicidial/get_repport.php"
 		//log.Println(url)
@@ -144,10 +199,11 @@ func calculateDuration(timeForCalcul string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	callTimeUTC := callTime.UTC()
 	currentTimeUTC := time.Now().UTC()
+	//log.Println("currentTimeUTC: ", currentTimeUTC)
 	duration := currentTimeUTC.Sub(callTimeUTC)
+	//	log.Println("callTimeUTC: ", callTimeUTC)
 	minutes := int(duration.Minutes())
 	seconds := int(duration.Seconds()) % 60
 	return fmt.Sprintf("%02d:%02d", minutes, seconds), nil
