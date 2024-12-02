@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 	"text/template"
@@ -18,8 +19,9 @@ import (
 func AutodialInfoHandler(w http.ResponseWriter, r *http.Request, servers map[string]models.ServerConfig) {
 	// Préparer une structure pour le template
 	type ServerData struct {
-		URL       string
-		CallCount string
+		URL           string
+		CallsSent     string
+		AgentsInGroup string
 	}
 
 	var serverList []ServerData
@@ -29,36 +31,71 @@ func AutodialInfoHandler(w http.ResponseWriter, r *http.Request, servers map[str
 		resp, err := http.Get(server.URL + "/vicidial/get_autodial_info.php")
 		if err != nil {
 			log.Println("Erreur lors de la requête vers", server.URL, ":", err)
-			serverList = append(serverList, ServerData{URL: server.URL, CallCount: "Erreur"})
+			serverList = append(serverList, ServerData{
+				URL:           server.URL,
+				CallsSent:     "Erreur",
+				AgentsInGroup: "Erreur",
+			})
 			continue
 		}
 		defer resp.Body.Close()
 
-		var data map[string]string
+		server.URL = strings.TrimPrefix(server.URL, "https://")
+
+		// Adapter pour accepter des chaînes ou des entiers
+		var data map[string]interface{}
 		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 			log.Println("Erreur de décodage JSON pour", server.URL, ":", err)
-			serverList = append(serverList, ServerData{URL: server.URL, CallCount: "Erreur"})
+			serverList = append(serverList, ServerData{
+				URL:           server.URL,
+				CallsSent:     "Erreur",
+				AgentsInGroup: "Erreur",
+			})
 			continue
 		}
 
-		callCount, ok := data["count"]
-		if !ok {
-			log.Println("Le champ 'count' est manquant dans la réponse de", server.URL)
-			serverList = append(serverList, ServerData{URL: server.URL, CallCount: "Non disponible"})
-			continue
-		}
+		// Extraire et convertir les données
+		callsSent := parseIntOrFallback(data["calls_sent"], "Non disponible")
+		agentsInGroup := parseIntOrFallback(data["agents_in_group"], "Non disponible")
 
-		serverList = append(serverList, ServerData{URL: server.URL, CallCount: callCount})
+		serverList = append(serverList, ServerData{
+			URL:           server.URL,
+			CallsSent:     callsSent,
+			AgentsInGroup: agentsInGroup,
+		})
 	}
+	sort.Slice(serverList, func(i, j int) bool {
+		return serverList[i].URL < serverList[j].URL
+	})
 
 	// Template HTML
 	tmpl := `
-		<h1>Etat des Serveurs</h1>
-		<ul>
-			{{range .}}
-				<li> {{.CallCount}} appels envoyés sur {{.URL}}</li>
-			{{end}}
-		</ul>
+   <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold text-center mb-6">État des Serveurs</h1>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {{range .}}
+            <li class="bg-white shadow-lg rounded-lg p-4 flex flex-col items-center space-y-3">
+                <!-- URL du serveur -->
+                <span 
+                    class="text-lg font-semibold text-gray-700 truncate max-w-full" 
+                    style="max-width: 12rem;"
+                    title="{{.URL}}">
+                    {{.URL}}
+                </span>
+                
+                <!-- Nombre d'appels envoyés -->
+                <span class="text-xl font-bold text-blue-600 bg-yellow-100 px-4 py-2 rounded-lg shadow-md">
+                    {{.CallsSent}} appels envoyés
+                </span>
+                
+                <!-- Nombre d'agents -->
+                <span class="text-lg text-green-700 bg-gray-100 px-4 py-2 rounded-lg shadow">
+                    {{.AgentsInGroup}} agents
+                </span>
+            </li>
+            {{end}}
+        </ul>
+    </div>
 	`
 
 	// Rendre le template
@@ -67,6 +104,21 @@ func AutodialInfoHandler(w http.ResponseWriter, r *http.Request, servers map[str
 		log.Println("Erreur lors du rendu du template :", err)
 		http.Error(w, "Erreur interne du serveur", http.StatusInternalServerError)
 	}
+}
+
+// Fonction utilitaire pour convertir les valeurs
+func parseIntOrFallback(value interface{}, fallback string) string {
+	switch v := value.(type) {
+	case string:
+		if intValue, err := strconv.Atoi(v); err == nil {
+			return fmt.Sprintf("%d", intValue)
+		}
+	case float64:
+		return fmt.Sprintf("%d", int(v))
+	case int:
+		return fmt.Sprintf("%d", v)
+	}
+	return fallback
 }
 
 func extractDomain(urlStr string) string {
