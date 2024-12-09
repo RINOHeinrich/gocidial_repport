@@ -83,6 +83,12 @@ func main() {
 			handler.ReportTableHandler(w, r, serverConfigs)
 		})).ServeHTTP(w, r)
 	})
+	// Sécuriser la route /report-table avec le middleware d'authentification
+	http.HandleFunc("/agent-reports", func(w http.ResponseWriter, r *http.Request) {
+		middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			handler.AgentReportHandler(w, r)
+		})).ServeHTTP(w, r)
+	})
 
 	// Autres routes
 	http.HandleFunc("/disable-users", func(w http.ResponseWriter, r *http.Request) {

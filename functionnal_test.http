@@ -1,0 +1,4 @@
+POST https://votre-endpoint-api.com/login
+Content-Type: application/x-www-form-urlencoded
+
+username=99016&password=0n2r5789H0ri

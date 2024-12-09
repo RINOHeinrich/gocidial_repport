@@ -10,78 +10,38 @@
 </head>
 <body class="bg-slate-200 text-white p-6">
 
-<div class="flex h-screen">
-    <!-- Sidebar -->
-    <div class="w-64 bg-green-700 text-white flex flex-col space-y-4 p-6">
-        <h2 class="text-2xl font-bold text-center mb-4">Menu</h2>
-        <nav>
-            <ul class="space-y-4">
-                <!-- Menu items -->
-                <li>
-                    <a 
-                        href="#"
-                        hx-get="/agent-report"
-                        hx-target="#content"
-                        hx-swap="innerHTML"
-                        class="block px-4 py-2 bg-green-600 rounded hover:bg-green-500 focus:outline-none">
-                        Rapport sur les agents
-                    </a>
-                </li>
-                <li>
-                    <a 
-                        href="#"
-                        hx-get="/campaign-report"
-                        hx-target="#content"
-                        hx-swap="innerHTML"
-                        class="block px-4 py-2 bg-green-600 rounded hover:bg-green-500 focus:outline-none">
-                        Rapport sur les campagnes
-                    </a>
-                </li>
-            </ul>
-        </nav>
+<div class="container mx-auto bg-white p-6 rounded shadow-lg">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-semibold text-green-600">Agent Report</h1>
+        <!-- Logout Button -->
+        <button 
+            class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 focus:outline-none" 
+            hx-post="/logout" 
+            hx-swap="none">
+            Se déconnecter
+        </button>
     </div>
-
-    <!-- Main Content -->
-    <div id="content" class="flex-1 bg-white p-6 rounded shadow-lg">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-semibold text-green-600">Agent Report</h1>
-            <!-- Logout Button -->
-            <button 
-                class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 focus:outline-none" 
-                hx-post="/logout" 
-                hx-swap="none">
-                Se déconnecter
-            </button>
-        </div>
-
-        <!-- Section AutoDial Info -->
-        <div id="autodial-info" class="text-black" hx-get="/autodial-info" hx-target="#autodial-info" hx-swap="innerHTML" hx-trigger="every 2s">
-            <!-- Contenu de /autodial-info sera injecté ici -->
-        </div> 
-
-        <!-- Table Section -->
-        <div>
-            <table class="min-w-full table-auto border-collapse border border-gray-300" 
-                   hx-get="/report-table" 
-                   hx-trigger="every 10s" 
-                   hx-target="#agent-table" 
-                   hx-swap="innerHTML">
-                <thead class="bg-green-600 text-white">
-                    <tr>
-                        <th class="px-4 py-2 border border-gray-300">Utilisateur</th>
-                        <th class="px-4 py-2 border border-gray-300">IP du serveur</th>
-                        <th class="px-4 py-2 border border-gray-300">Status</th>
-                        <th class="px-4 py-2 border border-gray-300">MM:SS</th>
-                        <th class="px-4 py-2 border border-gray-300">ID du campagne</th>
-                        <th class="px-4 py-2 border border-gray-300">Appelles du jour</th>
-                        <th class="px-4 py-2 border border-gray-300">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="agent-table" class="bg-white text-black">
-                    <!-- Données dynamiques ici -->
-                </tbody>
-            </table>
-        </div>
+     <div id="autodial-info" class="text-black" hx-get="/autodial-info"  hx-target="#autodial-info" hx-swapp="innerHTML" hx-trigger="every 2s" >
+        
+    </div> 
+    <!-- Table that will be updated every 10 seconds with HTMX -->
+    <div>
+        <table class="min-w-full table-auto border-collapse border border-gray-300" hx-get="/report-table" hx-trigger="every 10s" hx-target="#agent-table" hx-swapp="innerHTML">
+            <thead class="bg-green-600 text-white">
+                <tr>
+                    <th class="px-4 py-2 border border-gray-300">Utilisateur</th>
+                    <th class="px-4 py-2 border border-gray-300">IP du serveur</th>
+                    <th class="px-4 py-2 border border-gray-300">Status</th>
+                    <th class="px-4 py-2 border border-gray-300">MM:SS</th>
+                    <th class="px-4 py-2 border border-gray-300">ID du campagne</th>
+                    <th class="px-4 py-2 border border-gray-300">Appelles du jour</th>
+                    <th class="px-4 py-2 border border-gray-300">Action</th>
+                </tr>
+            </thead>
+            <tbody id="agent-table" class="bg-white text-black">
+                <!-- Data will be populated here dynamically -->
+            </tbody>
+        </table>
     </div>
 </div>
 

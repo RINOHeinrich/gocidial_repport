@@ -16,7 +16,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		cookie, err := r.Cookie("auth_token")
 		if err != nil {
 			//log.Printf("Erreur lors de la récupération du cookie : %v", err)
-			http.Redirect(w, r, "/auth", http.StatusSeeOther) // Redirige vers la page d'accueil
+			w.Header().Set("HX-Redirect", "/auth") // Redirige vers la page d'accueil
+			w.WriteHeader(http.StatusOK)
 			return
 		}
 
@@ -43,7 +44,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		if err != nil {
 			//	log.Printf("Erreur lors de la validation du token : %v", err)
-			http.Redirect(w, r, "/auth", http.StatusSeeOther) // Redirige vers la page d'accueil
+			w.Header().Set("HX-Redirect", "/auth") // Redirige vers la page d'accueil
+			w.WriteHeader(http.StatusOK)
 			return
 		}
 
@@ -52,7 +54,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			// Ajouter les informations du token dans le contexte si nécessaire
 			next.ServeHTTP(w, r)
 		} else {
-			http.Redirect(w, r, "/auth", http.StatusSeeOther) // Redirige vers la page d'accueil
+			w.Header().Set("HX-Redirect", "/auth") // Redirige vers la page d'accueil
+			w.WriteHeader(http.StatusOK)
 		}
 	})
 }

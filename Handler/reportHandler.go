@@ -219,23 +219,32 @@ func ReportTableHandler(w http.ResponseWriter, r *http.Request, servers map[stri
     <td class="px-4 py-2 border border-gray-300">{{.CampaignID}}</td>
     <td class="px-4 py-2 border border-gray-300">{{.CallsToday}}</td>
     <td class="px-4 py-2 border border-gray-300">
-		<button 
-   		 class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-   		 hx-post="/disable-users"
-		 hx-ext="json-enc" 
-    	 hx-vals='{"user": "{{.User}}", "domain": "{{.SourceDomain}}"}'
-    	 hx-target="#agent-table"
-		 hx-swapp="innerHTML"
-		 hx-confirm="Êtes vous sure de vouloir déconnecter l'agent {{.User}}?"
-		 >
-    	 Déconnecter
-		</button>
-
+        <!-- Bouton Déconnecter -->
+        <button 
+            class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
+            hx-post="/disable-users"
+            hx-ext="json-enc" 
+            hx-vals='{"user": "{{.User}}", "domain": "{{.SourceDomain}}"}'
+            hx-target="#agent-table"
+            hx-swapp="innerHTML"
+            hx-confirm="Êtes-vous sûr de vouloir déconnecter l'agent {{.User}}?"
+        >
+            Déconnecter
+        </button>
+        <!-- Bouton Écouter -->
+        <button 
+            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded flex items-center gap-2 ml-2"
+            hx-post="/listen-agent"
+            hx-ext="json-enc"
+            hx-vals='{"user": "{{.User}}", "domain": "{{.SourceDomain}}"}'
+            hx-target="#agent-table"
+            hx-swapp="innerHTML"
+        >
+            Écouter
+        </button>
     </td>
 </tr>
 {{end}}
-
-
     `
 
 	t := template.Must(template.New("table").Parse(tmpl))

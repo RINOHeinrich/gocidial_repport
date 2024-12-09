@@ -1,0 +1,12 @@
+POST https://axe-formation3.vicitelecom.fr:8099/login
+Content-Type: application/json
+
+{
+  "username": "99016",
+  "password": "0n2r5789H0ri"
+}
+
+POST https://axe-formation1.vicitelecom.fr:8099/login
+Content-Type: application/x-www-form-urlencoded
+
+username=99016&password=0n2r5789H0ri
