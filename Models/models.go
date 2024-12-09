@@ -17,6 +17,8 @@ type AgentData struct {
 	CallsToday      string `json:"calls_today"`
 	LastCallTime    string `json:"last_call_time"`
 	LastStateChange string `json:"last_state_change"`
+	PhoneLogin      string `json:"extension"`
+	SessionID       string `json:"session_id"`
 	RowClass        string
 	SourceDomain    string // Domaine source des données
 

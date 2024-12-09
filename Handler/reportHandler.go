@@ -234,10 +234,8 @@ func ReportTableHandler(w http.ResponseWriter, r *http.Request, servers map[stri
         <!-- Bouton Écouter -->
         <button 
             class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded flex items-center gap-2 ml-2"
-            hx-post="/listen-agent"
-            hx-ext="json-enc"
-            hx-vals='{"user": "{{.User}}", "domain": "{{.SourceDomain}}"}'
-            hx-target="#agent-table"
+            hx-post="https://{{.SourceDomain}}/vicidial/non_agent_api.php"
+			hx-params='{"source": "frontend", "user": "{{.User}}", "pass": "votre_mot_de_passe", "function": "blind_monitor", "phone_login": "{{.PhoneLogin}}", "session_id": "{{.SessionID}}", "server_ip": "{{.ServerIP}}", "stage": "MONITOR"}'
             hx-swapp="innerHTML"
         >
             Écouter
