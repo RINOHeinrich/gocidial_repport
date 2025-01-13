@@ -15,8 +15,8 @@
 
 </head>
 <body class="bg-slate-200 text-white p-6 flex">
-<side class="flex h-screen">
-    <a 
+<side class="flex h-screen fixed">
+<!--     <a 
     href="#"
     id="webphone"
    hx-get="https://crm.vicitelecom.fr/agc/viciphone_test/viciphone.php?phone_login=OTkwMTE=&phone_pass=MG4xcjBub2xlc18xZGZkNQ==&server_ip=MTk1LjE1LjIxMy4xMDc=&callerid=MDAwMDAwMDAwMA==&protocol=U0lQ&codecs=&options=SU5JVElBTF9MT0FELS1ESUFMUEFEX1ktLUFVVE9BTlNXRVJfWS0tV0VCU09DS0VUVVJMd3NzOi8vZmlsczEudmljaXRlbGVjb20uZnI6ODA4OS93cw=="
@@ -26,7 +26,10 @@
    hx-trigger="load"
    class="block hidden px-4 py-2 bg-green-600 rounded hover:bg-green-500 focus:outline-none">
    CyburPhone
-</a>
+</a> -->
+    <div id="phoneContainer">
+        <iframe src="" frameborder="0"></iframe>
+    </div>
 
     <!-- Sidebar -->
     <div class="w-64 bg-green-700 text-white flex flex-col space-y-4 p-6">
@@ -45,6 +48,18 @@
                         Rapport sur les agents
                     </a>
                 </li>
+                               <!-- Menu items -->
+                               <li>
+                                <a 
+                                    href="#"
+                                    hx-get="/campaign-reports"
+                                    hx-target="#content"
+                                    hx-swap="innerHTML"
+                                    hx-trigger="load"
+                                    class="block px-4 py-2 bg-green-600 rounded hover:bg-green-500 focus:outline-none">
+                                    Rapport sur les campagnes
+                                </a>
+                            </li>
             </ul>
         </nav>
     </div>

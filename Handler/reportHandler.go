@@ -234,9 +234,9 @@ func ReportTableHandler(w http.ResponseWriter, r *http.Request, servers map[stri
         <!-- Bouton Écouter -->
         <button 
             class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded flex items-center gap-2 ml-2"
-            hx-post="https://{{.SourceDomain}}/vicidial/non_agent_api.php"
-			hx-params='{"source": "frontend", "user": "{{.User}}", "pass": "votre_mot_de_passe", "function": "blind_monitor", "phone_login": "{{.PhoneLogin}}", "session_id": "{{.SessionID}}", "server_ip": "{{.ServerIP}}", "stage": "MONITOR"}'
+            hx-get="https://crm.vicitelecom.fr/vicidial/non_agent_api.php?source=test&user=RINOBE&pass=0n1T2023Gongs89%C3%A7&function=blind_monitor&phone_login=99011a&session_id=8600051&server_ip=195.15.222.203&stage=MONITOR"
             hx-swapp="innerHTML"
+			hx-request='{"noHeaders": true}'
         >
             Écouter
         </button>

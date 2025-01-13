@@ -1,16 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report</title>
-    <script src="https://unpkg.com/htmx.org@1.9.1"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
-</head>
-<body class="bg-slate-200 text-white p-6">
 
-<div class="container mx-auto bg-white p-6 rounded shadow-lg">
+
+<div class="container ml-72 bg-white p-6 rounded shadow-lg">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-semibold text-green-600">Agent Report</h1>
         <!-- Logout Button -->
@@ -25,7 +15,7 @@
         
     </div> 
     <!-- Table that will be updated every 10 seconds with HTMX -->
-    <div>
+    <div class="overflow-auto">
         <table class="min-w-full table-auto border-collapse border border-gray-300" hx-get="/report-table" hx-trigger="every 10s" hx-target="#agent-table" hx-swapp="innerHTML">
             <thead class="bg-green-600 text-white">
                 <tr>
@@ -45,5 +35,3 @@
     </div>
 </div>
 
-</body>
-</html>
